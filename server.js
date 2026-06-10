@@ -1,92 +1,65 @@
 // ============================================================================
-// ARCHIVO MAESTRO DEL SERVIDOR - CERO ABSOLUTO (PRODUCCI√ìN)
-// Ecosistema seguro, escalable y eficiente para transformaci√≥n digital
+// ARCHIVO MAESTRO DEL SERVIDOR - CERO ABSOLUTO (PRODUCCI”N REFACTORIZADO)
+// Ecosistema seguro, escalable y eficiente utilizando librerÌas modulares
 // ============================================================================
 
 const express = require('express');
 const path = require('path');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
+// ImportaciÛn de tu propia librerÌa de seguridad de nivel mundial
+const { aplicarSeguridad } = require('@marcanofranco67-png/cero-seguridad-lib');
 
-// Inicializaci√≥n de la infraestructura de Express
+// InicializaciÛn de la infraestructura de Express
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 1. BLINDAJE DE SEGURIDAD GENERAL (Helmet)
-// Configura autom√°ticamente cabeceras HTTP seguras para mitigar XSS, clickjacking y sniffing
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"], // Permite scripts nativos del frontend base
-            styleSrc: ["'self'", "'unsafe-inline'"],  // Permite estilos en cascada nativos
-            imgSrc: ["'self'", "data:"],
-            connectSrc: ["'self'"]
-        }
-    }
-}));
+// 1. BLINDAJE DE SEGURIDAD MODULAR (Tu propia librerÌa)
+// Inyecta autom·ticamente Helmet (CSP) y Express Rate Limit en una sola lÌnea
+aplicarSeguridad(app);
 
 // Parsers eficientes para el manejo de datos entrantes sin sobrecargar la memoria
-app.use(express.json({ limit: '10kb' })); // Protege contra ataques de denegaci√≥n de servicio (DoS) por JSON masivos
+app.use(express.json({ limit: '10kb' })); // Protege contra DoS por JSON masivos
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-// 2. ESCUDO ANTISATURACI√ìN (Express Rate Limit)
-// Mitiga ataques de fuerza bruta y DDoS limitando las peticiones por IP
-const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // Ventana de tiempo: 15 minutos
-    max: 100, // L√≠mite estricto: 100 peticiones por IP por ventana
-    standardHeaders: true, // Devuelve informaci√≥n de l√≠mite en las cabeceras RateLimit-*
-    legacyHeaders: false, // Desactiva las cabeceras heredadas X-RateLimit-*
-    message: {
-        status: 429,
-        error: 'Demasiadas peticiones desde esta direcci√≥n IP. Por favor, intente m√°s tarde.'
-    }
-});
-app.use(apiLimiter);
-
-// 3. CAPA DE EFICIENCIA Y RENDIMIENTO (Servicio Est√°tico)
-// Sirve el frontend optimizando la cach√© del navegador para m√°xima velocidad de carga
+// 2. CAPA DE EFICIENCIA Y RENDIMIENTO (Servicio Est·tico)
 const cacheOptions = {
     dotfiles: 'ignore',
     etag: true,
     extensions: ['html', 'htm', 'css', 'js'],
     index: 'index.html',
-    maxAge: '1d', // Cachea recursos est√°ticos por un d√≠a para ahorrar ancho de banda
+    maxAge: '1d', // Cachea recursos est·ticos por un dÌa
     redirect: false
 };
 app.use(express.static(path.join(__dirname), cacheOptions));
 
-// 4. MANEJO DE RUTAS (Escalabilidad H√≠brida)
-// Endpoint base para el Frontend de Cero Absoluto
+// 3. MANEJO DE RUTAS (Escalabilidad HÌbrida)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Endpoint t√©cnico de auditor√≠a de salud (Health Check) - Vital para monitoreo y DevOps
+// Endpoint tÈcnico de auditorÌa de salud (Health Check)
 app.get('/api/health', (req, res) => {
     res.status(200).json({
         status: 'UP',
         timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'development'
+        environment: process.env.NODE_ENV || 'development',
+        security: 'Modular Perimeter Active'
     });
 });
 
-// 5. CONTROLADOR GLOBAL DE ERRORES (Robustez y Antifragilidad)
-// Captura cualquier fallo en el sistema para evitar que el servidor se caiga (Crash)
+// 4. CONTROLADOR GLOBAL DE ERRORES (Robustez y Antifragilidad)
 app.use((err, req, res, next) => {
     console.error(`[ERROR SEVERO]: ${err.message}`);
     res.status(500).json({
         status: 'error',
-        message: 'Ocurri√≥ un error interno en el servidor seguro.'
+        message: 'OcurriÛ un error interno en el servidor seguro.'
     });
 });
 
-// Inicializaci√≥n f√≠sica del servicio
+// InicializaciÛn fÌsica del servicio
 app.listen(PORT, () => {
     console.log(`\n=========================================================`);
-    console.log(`üöÄ SERVIDOR SEGURO CORRIENDO EN EL PUERTO: ${PORT}`);
-    console.log(`üõ°Ô∏è  Seguridad Helmet: ACTIVADA`);
-    console.log(`üõë Rate Limiter: ACTIVADO (Max 100 peticiones / 15 min)`);
-    console.log(`üåç Entorno Actual: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`?? SERVIDOR SEGURO CORRIENDO EN EL PUERTO: ${PORT}`);
+    console.log(`???  Ecosistema de Seguridad: COMPONENTE GLOBAL INTEGRADO`);
+    console.log(`?? Dependencia: @marcanofranco67-png/cero-seguridad-lib`);
     console.log(`=========================================================\n`);
 });
