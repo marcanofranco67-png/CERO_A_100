@@ -1,11 +1,20 @@
-ï»¿const express = require('express');
+// 1. Inicialización inmediata de variables de entorno (Obligatorio en la primera línea)
+require('dotenv').config();
+
+const express = require('express');
 const helmet = require('helmet');
 const { rateLimit } = require('express-rate-limit');
-// Importamos tu librerÃ­a local de seguridad
+
+// Importamos tu librería local de seguridad y los módulos del ecosistema
 const ceroSeguridad = require('@marcanofranco67-png/cero-seguridad-lib');
+const conectarDB = require('./config/db');
+const proyectoRoutes = require('./routes/proyectoRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// --- CONEXIÓN SÍNCRONA AL MOTOR DE DATOS LOCAL ---
+conectarDB();
 
 // --- CAPA DE SEGURIDAD PERIMETRAL (Cero Humo, Blindaje Real) ---
 app.use(helmet()); // Cabeceras HTTP seguras
@@ -14,15 +23,19 @@ app.use(express.json()); // Parsing de JSON nativo
 // Limitador de peticiones para evitar ataques de fuerza bruta / DoS
 const limtiadorPeticiones = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
-    limit: 100, // MÃ¡ximo 100 peticiones por IP por ventana
-    message: { error: 'Demasiadas peticiones desde esta IP. IntÃ©ntalo mÃ¡s tarde.' },
+    limit: 100, // Máximo 100 peticiones por IP por ventana
+    message: { error: 'Demasiadas peticiones desde esta IP. Inténtalo más tarde.' },
     standardHeaders: 'draft-7',
     legacyHeaders: false,
 });
 app.use(limtiadorPeticiones);
 
-// InicializaciÃ³n de tu librerÃ­a personalizada si requiere alguna configuraciÃ³n interna
-// ceroSeguridad.init(app); 
+// Inicialización de tu librería personalizada si requiere alguna configuración interna
+// ceroSeguridad.init(app);
+
+// --- INYECCIÓN DE RUTAS MODULARES ---
+// Vinculamos el enrutador con su prefijo correspondiente
+app.use('/api/proyectos', proyectoRoutes);
 
 // --- RUTAS BASE DEL ECOSISTEMA ---
 app.get('/', (req, res) => {
@@ -33,14 +46,14 @@ app.get('/', (req, res) => {
     });
 });
 
-// --- MANEJO DE ERRORES GLOBAL (Evita fugas de informaciÃ³n en consola/cliente) ---
+// --- MANEJO DE ERRORES GLOBAL (Evita fugas de información en consola/cliente) ---
 app.use((err, req, res, next) => {
     console.error(`[Error del Servidor]: ${err.message}`);
     res.status(500).json({ error: 'Fallo interno en la infraestructura segura.' });
 });
 
 app.listen(PORT, () => {
-    console.log(`\nðŸš€ [CERO ABSOLUTO RUNNING]`);
-    console.log(`ðŸ“¡ Servidor seguro escuchando en: http://localhost:${PORT}`);
-    console.log(`ðŸ”’ Blindaje perimetral activo (Helmet + Rate-Limit)\n`);
+    console.log(`\n?? [CERO ABSOLUTO RUNNING]`);
+    console.log(`?? Servidor seguro escuchando en: http://localhost:${PORT}`);
+    console.log(`?? Blindaje perimetral activo (Helmet + Rate-Limit)\n`);
 });
