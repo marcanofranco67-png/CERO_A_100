@@ -1816,3 +1816,159 @@ p + p {
 ::-webkit-scrollbar-track { background: var(--color-bg-base); }
 ::-webkit-scrollbar-thumb { background: rgba(249,115,22,0.4); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-fire); }
+
+
+/* ============================================================
+   ESTILOS DE CAPAS INTERACTIVAS (MODALES, FORMULARIOS Y CHECKOUT)
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(8, 12, 20, 0.85); /* Base oscura con transparencia */
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-overlay[hidden] {
+  display: none !important;
+}
+
+.modal-container {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-bg-border);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 480px;
+  padding: 2.5rem;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.75rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: var(--color-fire);
+}
+
+.auth-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--color-bg-border);
+  margin-bottom: 2rem;
+}
+
+.auth-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 0.75rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.auth-tab--active {
+  color: var(--color-fire);
+  border-bottom: 2px solid var(--color-fire);
+  margin-bottom: -2px;
+}
+
+.auth-title {
+  font-size: 1.5rem;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.form-group input {
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-bg-border);
+  border-radius: 4px;
+  padding: 0.75rem;
+  color: var(--color-text-primary);
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--color-blue);
+}
+
+.btn-submit {
+  width: 100%;
+  background-color: var(--color-fire);
+  color: var(--color-bg-base);
+  border: none;
+  padding: 0.875rem;
+  border-radius: 4px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+}
+
+.btn-submit:hover {
+  background-color: var(--color-fire-hover);
+}
+
+#secure-card-mount {
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-bg-border);
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.payment-summary {
+  display: flex;
+  justify-content: space-between;
+  margin: 1.5rem 0;
+  padding: 1rem 0;
+  border-top: 1px solid var(--color-bg-border);
+  border-bottom: 1px solid var(--color-bg-border);
+  font-size: 0.95rem;
+}
+
+.payment-summary strong {
+  color: var(--color-blue);
+}
+
+.error-message-live {
+  color: #EF4444;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
