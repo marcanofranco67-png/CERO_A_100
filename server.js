@@ -1,11 +1,12 @@
-// 1. Inicialización inmediata de variables de entorno (Obligatorio en la primera línea)
+ï»¿// 1. InicializaciÃ³n inmediata de variables de entorno (Obligatorio en la primera lÃ­nea)
 require('dotenv').config();
 
 const express = require('express');
 const helmet = require('helmet');
+const cors = require('cors');
 const { rateLimit } = require('express-rate-limit');
 
-// Importamos tu librería local de seguridad y los módulos del ecosistema
+// Importamos tu librerÃ­a local de seguridad y los mÃ³dulos del ecosistema
 const ceroSeguridad = require('@marcanofranco67-png/cero-seguridad-lib');
 const conectarDB = require('./config/db');
 const proyectoRoutes = require('./routes/proyectoRoutes');
@@ -13,27 +14,28 @@ const proyectoRoutes = require('./routes/proyectoRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- CONEXIÓN SÍNCRONA AL MOTOR DE DATOS LOCAL ---
+// --- CONEXIÃ“N SÃNCRONA AL MOTOR DE DATOS LOCAL ---
 conectarDB();
 
 // --- CAPA DE SEGURIDAD PERIMETRAL (Cero Humo, Blindaje Real) ---
 app.use(helmet()); // Cabeceras HTTP seguras
+app.use(cors());
 app.use(express.json()); // Parsing de JSON nativo
 
 // Limitador de peticiones para evitar ataques de fuerza bruta / DoS
 const limtiadorPeticiones = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
-    limit: 100, // Máximo 100 peticiones por IP por ventana
-    message: { error: 'Demasiadas peticiones desde esta IP. Inténtalo más tarde.' },
+    limit: 100, // MÃ¡ximo 100 peticiones por IP por ventana
+    message: { error: 'Demasiadas peticiones desde esta IP. IntÃ©ntalo mÃ¡s tarde.' },
     standardHeaders: 'draft-7',
     legacyHeaders: false,
 });
 app.use(limtiadorPeticiones);
 
-// Inicialización de tu librería personalizada si requiere alguna configuración interna
+// InicializaciÃ³n de tu librerÃ­a personalizada si requiere alguna configuraciÃ³n interna
 // ceroSeguridad.init(app);
 
-// --- INYECCIÓN DE RUTAS MODULARES ---
+// --- INYECCIÃ“N DE RUTAS MODULARES ---
 // Vinculamos el enrutador con su prefijo correspondiente
 app.use('/api/proyectos', proyectoRoutes);
 
@@ -46,7 +48,7 @@ app.get('/', (req, res) => {
     });
 });
 
-// --- MANEJO DE ERRORES GLOBAL (Evita fugas de información en consola/cliente) ---
+// --- MANEJO DE ERRORES GLOBAL (Evita fugas de informaciÃ³n en consola/cliente) ---
 app.use((err, req, res, next) => {
     console.error(`[Error del Servidor]: ${err.message}`);
     res.status(500).json({ error: 'Fallo interno en la infraestructura segura.' });
