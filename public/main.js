@@ -13,11 +13,6 @@
 /* ============================================================
    MÓDULO 1: MENÚ MÓVIL
    Gestiona el estado abierto/cerrado del nav móvil.
-   - Usa aria-expanded para comunicar estado a lectores de pantalla
-   - Usa el atributo `hidden` (no display:none via CSS) para que
-     el contenido sea realmente inaccesible cuando está cerrado
-   - Cierra con Escape (WCAG 2.1.2)
-   - Atrapa el foco dentro del menú cuando está abierto (focus trap)
 ============================================================ */
 function initMobileMenu() {
   const toggle  = document.querySelector('.nav-toggle');
@@ -26,16 +21,13 @@ function initMobileMenu() {
 
   if (!toggle || !mobileNav) return;
 
-  /** Abre el menú y actualiza el estado ARIA */
   function openMenu() {
     mobileNav.removeAttribute('hidden');
     toggle.setAttribute('aria-expanded', 'true');
     toggle.setAttribute('aria-label', 'Cerrar menú de navegación');
-    // Foco al primer link del menú
     if (mobileLinks.length) mobileLinks[0].focus();
   }
 
-  /** Cierra el menú y devuelve el foco al botón que lo abrió */
   function closeMenu() {
     mobileNav.setAttribute('hidden', '');
     toggle.setAttribute('aria-expanded', 'false');
@@ -48,19 +40,16 @@ function initMobileMenu() {
     isOpen ? closeMenu() : openMenu();
   });
 
-  // Cerrar con Escape — WCAG 2.1.2 (No Keyboard Trap)
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
       closeMenu();
     }
   });
 
-  // Cerrar al hacer click en un link del menú móvil
   mobileLinks.forEach(link => {
     link.addEventListener('click', closeMenu);
   });
 
-  // Cerrar si se hace click fuera del menú
   document.addEventListener('click', (e) => {
     const isOpen = toggle.getAttribute('aria-expanded') === 'true';
     if (isOpen && !mobileNav.contains(e.target) && !toggle.contains(e.target)) {
@@ -73,17 +62,12 @@ function initMobileMenu() {
 /* ============================================================
    MÓDULO 2: SCROLL REVEAL
    Anima elementos al entrar en el viewport.
-   - Usa IntersectionObserver (API moderna, sin scroll listeners)
-   - Respeta prefers-reduced-motion: si el usuario prefiere no
-     animaciones, marca los elementos como visibles sin animación
-   - No bloquea el hilo principal
 ============================================================ */
 function initScrollReveal() {
   const revealElements = document.querySelectorAll('.reveal');
 
   if (!revealElements.length) return;
 
-  // Si el usuario prefiere movimiento reducido, mostramos todo sin animar
   const prefersReducedMotion = window.matchMedia(
     '(prefers-reduced-motion: reduce)'
   ).matches;
@@ -98,14 +82,13 @@ function initScrollReveal() {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-visible');
-          // Una vez visible, dejamos de observar — ahorra memoria
           observer.unobserve(entry.target);
         }
       });
     },
     {
-      threshold: 0.12,        // Elemento 12% visible antes de animar
-      rootMargin: '0px 0px -40px 0px', // Margen inferior para suavizar
+      threshold: 0.12,
+      rootMargin: '0px 0px -40px 0px',
     }
   );
 
@@ -116,8 +99,6 @@ function initScrollReveal() {
 /* ============================================================
    MÓDULO 3: HEADER SCROLL
    Ajusta el header al hacer scroll.
-   - Solo modifica clases CSS, nunca estilos inline
-   - Usa requestAnimationFrame para no bloquear el hilo de render
 ============================================================ */
 function initHeaderScroll() {
   const header = document.querySelector('.site-header');
@@ -140,16 +121,13 @@ function initHeaderScroll() {
       requestAnimationFrame(updateHeader);
       ticking = true;
     }
-  }, { passive: true }); // passive:true mejora el rendimiento del scroll
+  }, { passive: true });
 }
 
 
 /* ============================================================
    MÓDULO 4: NAVEGACIÓN ACTIVA
-   Marca el link del nav correspondiente a la sección visible.
-   - Usa IntersectionObserver, no scroll listeners costosos
-   - Actualiza aria-current="page" para lectores de pantalla
-     (WCAG 4.1.2 — Name, Role, Value)
+   Marka el link del nav correspondiente a la sección visible.
 ============================================================ */
 function initActiveNav() {
   const sections  = document.querySelectorAll('section[id]');
@@ -167,7 +145,6 @@ function initActiveNav() {
         navLinks.forEach(link => {
           const isActive = link.getAttribute('href') === `#${id}`;
           link.classList.toggle('nav-link--active', isActive);
-          // aria-current comunica la sección activa a lectores de pantalla
           if (isActive) {
             link.setAttribute('aria-current', 'true');
           } else {
@@ -177,8 +154,8 @@ function initActiveNav() {
       });
     },
     {
-      threshold: 0.4, // Sección debe ser 40% visible para considerarse activa
-      rootMargin: '-80px 0px 0px 0px', // Compensa el header fijo
+      threshold: 0.4,
+      rootMargin: '-80px 0px 0px 0px',
     }
   );
 
@@ -188,11 +165,7 @@ function initActiveNav() {
 
 /* ============================================================
    MÓDULO 5: SMOOTH SCROLL ACCESIBLE
-   El CSS scroll-behavior:smooth ya maneja esto para la mayoría.
-   Este módulo añade soporte para navegadores sin CSS smooth scroll
-   y gestiona el foco correctamente al navegar por anclas.
-   - Mueve el foco al heading de la sección destino (WCAG 2.4.3)
-   - Esto es esencial para usuarios de lectores de pantalla
+   Soporte para navegación por anclas y control de foco.
 ============================================================ */
 function initAccessibleAnchorNav() {
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -203,16 +176,17 @@ function initAccessibleAnchorNav() {
       const target = document.getElementById(targetId);
       if (!target) return;
 
-      // Encontrar el primer encabezado dentro de la sección destino
-      // para moverle el foco — fundamental para usuarios de teclado
+      // EXCEPCIÓN: Si hacemos clic en los botones de "Trabajemos juntos", evitamos el salto
+      if (anchor.classList.contains('btn--primary') || anchor.classList.contains('mobile-nav-link--cta')) {
+        return; 
+      }
+
       const heading = target.querySelector('h1, h2, h3, [tabindex]');
 
       if (heading) {
-        // tabindex="-1" permite recibir foco programático sin afectar tab order
         if (!heading.hasAttribute('tabindex')) {
           heading.setAttribute('tabindex', '-1');
         }
-        // Delay mínimo para que el scroll termine antes de mover el foco
         setTimeout(() => heading.focus({ preventScroll: false }), 100);
       }
     });
@@ -221,9 +195,67 @@ function initAccessibleAnchorNav() {
 
 
 /* ============================================================
-   PUNTO DE ENTRADA — DOMContentLoaded
-   Inicializamos todos los módulos cuando el DOM está listo.
-   No esperamos a que carguen imágenes (no es necesario aquí).
+   MÓDULO 8: GESTIÓN DE MODALES (AUTH & CHECKOUT)
+   Controla la aparición de formularios y cambio de tabs.
+============================================================ */
+function initModals() {
+  const authModal = document.getElementById('modal-auth');
+  const checkoutModal = document.getElementById('modal-checkout');
+
+  function toggleModal(modal, show) {
+    if (!modal) return;
+    if (show) modal.removeAttribute('hidden');
+    else modal.setAttribute('hidden', '');
+  }
+
+  // >>> NUEVO: Conectar enlaces y botones "Trabajemos juntos" con la Modal de Auth <<<
+  const actionButtons = document.querySelectorAll('.btn--primary, .mobile-nav-link--cta');
+  
+  actionButtons.forEach(button => {
+    button.addEventListener('click', (event) => {
+      if (button.getAttribute('href') === '#contacto') {
+        event.preventDefault(); // Evita que salte la pantalla hacia abajo
+      }
+      toggleModal(authModal, true); // Despliega el panel de registro seguro
+
+      // UX Accesible: Foco al primer input del formulario
+      const firstInput = document.getElementById('reg-name');
+      if (firstInput) firstInput.focus();
+    });
+  });
+
+  // Escuchadores para botones de cierre (La X de las modales)
+  document.querySelectorAll('.modal-close').forEach(btn => {
+    btn.addEventListener('click', () => {
+      toggleModal(authModal, false);
+      toggleModal(checkoutModal, false);
+    });
+  });
+
+  // Lógica de Tabs en Auth (Registrarse / Iniciar Sesión)
+  const tabs = document.querySelectorAll('.auth-tab');
+  const panels = document.querySelectorAll('.auth-form');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => {
+        t.classList.remove('auth-tab--active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('auth-tab--active');
+      tab.setAttribute('aria-selected', 'true');
+
+      panels.forEach(panel => panel.setAttribute('hidden', ''));
+      const targetId = tab.getAttribute('aria-controls');
+      const targetPanel = document.getElementById(targetId);
+      if (targetPanel) targetPanel.removeAttribute('hidden');
+    });
+  });
+}
+
+
+/* ============================================================
+   PUNTO DE ENTRADA ÚNICO — DOMContentLoaded
 ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
@@ -231,4 +263,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initHeaderScroll();
   initActiveNav();
   initAccessibleAnchorNav();
+  initModals(); // Inicialización única y ordenada
 });

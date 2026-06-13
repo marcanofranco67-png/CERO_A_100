@@ -1,12 +1,11 @@
-﻿// 1. Inicialización inmediata de variables de entorno (Obligatorio en la primera línea)
 require('dotenv').config();
 
 const express = require('express');
+const path = require('path');
 const helmet = require('helmet');
 const cors = require('cors');
 const { rateLimit } = require('express-rate-limit');
 
-// Importamos tu librería local de seguridad y los módulos del ecosistema
 const ceroSeguridad = require('@marcanofranco67-png/cero-seguridad-lib');
 const conectarDB = require('./config/db');
 const proyectoRoutes = require('./routes/proyectoRoutes');
@@ -14,33 +13,27 @@ const proyectoRoutes = require('./routes/proyectoRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- CONEXIÓN SÍNCRONA AL MOTOR DE DATOS LOCAL ---
 conectarDB();
 
-// --- CAPA DE SEGURIDAD PERIMETRAL (Cero Humo, Blindaje Real) ---
-app.use(helmet()); // Cabeceras HTTP seguras
+app.use(helmet());
 app.use(cors());
-app.use(express.json()); // Parsing de JSON nativo
+app.use(express.json());
 
-// Limitador de peticiones para evitar ataques de fuerza bruta / DoS
+// Servir archivos estáticos de la carpeta public
+app.use(express.static(path.join(__dirname, 'public')));
+
 const limtiadorPeticiones = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutos
-    limit: 100, // Máximo 100 peticiones por IP por ventana
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
     message: { error: 'Demasiadas peticiones desde esta IP. Inténtalo más tarde.' },
     standardHeaders: 'draft-7',
     legacyHeaders: false,
 });
 app.use(limtiadorPeticiones);
 
-// Inicialización de tu librería personalizada si requiere alguna configuración interna
-// ceroSeguridad.init(app);
-
-// --- INYECCIÓN DE RUTAS MODULARES ---
-// Vinculamos el enrutador con su prefijo correspondiente
 app.use('/api/proyectos', proyectoRoutes);
 
-// --- RUTAS BASE DEL ECOSISTEMA ---
-app.get('/', (req, res) => {
+app.get('/api/status', (req, res) => {
     res.status(200).json({
         status: 'online',
         message: 'Ecosistema Cero Absoluto - Infraestructura de Growth Partner Activa.',
@@ -48,14 +41,13 @@ app.get('/', (req, res) => {
     });
 });
 
-// --- MANEJO DE ERRORES GLOBAL (Evita fugas de información en consola/cliente) ---
 app.use((err, req, res, next) => {
     console.error(`[Error del Servidor]: ${err.message}`);
     res.status(500).json({ error: 'Fallo interno en la infraestructura segura.' });
 });
 
 app.listen(PORT, () => {
-    console.log(`\n?? [CERO ABSOLUTO RUNNING]`);
-    console.log(`?? Servidor seguro escuchando en: http://localhost:${PORT}`);
-    console.log(`?? Blindaje perimetral activo (Helmet + Rate-Limit)\n`);
+    console.log(`\n🛸 [CERO ABSOLUTO RUNNING]`);
+    console.log(`🛸 Servidor seguro escuchando en: http://localhost:${PORT}`);
+    console.log(`🛸 Blindaje perimetral activo (Helmet + Rate-Limit)\n`);
 });
